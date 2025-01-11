@@ -9,7 +9,6 @@ import java.net.http.HttpResponse;
 public class ConsumoAPI {
 
     public static String obtenerDatos(String url){
-        System.out.println("navegando a : "+url);
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -23,7 +22,6 @@ public class ConsumoAPI {
             throw new RuntimeException(e);
         }
         String json = response.body();
-        System.out.println("rta"+ json);
         return json;
     }
 }
