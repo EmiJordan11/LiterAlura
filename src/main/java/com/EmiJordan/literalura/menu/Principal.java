@@ -13,6 +13,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Principal {
 
@@ -25,7 +26,7 @@ public class Principal {
     }
 
     public void mostrarMenu(int numMenu){
-
+        Integer opcionElegida;
         switch (numMenu){
             case 0:
                 limpiarConsola();
@@ -65,13 +66,30 @@ public class Principal {
                 1- Sí
                 2- No
                 """);
-                Integer opcionElegida = ManejadorDeErrores.validarOpcion(2);
+                opcionElegida = ManejadorDeErrores.validarOpcion(2);
                 if (opcionElegida==1){
                     mostrarMenu(0);
                 } else {
                     mostrarMenu(-1);
                 }
                 break;
+//            case 2:
+//                System.out.println("""
+//                        El resultado se basa en la coincidencia con el título y se muestra el más popular
+//                        Es este el libro que estaba buscando?
+//
+//                        1- Sí (mostrar información de este libro)
+//                        2- No (ingresar un título más parecido al del libro que estoy buscando)
+//                        """);
+//                opcionElegida = ManejadorDeErrores.validarOpcion(2);
+//                if (opcionElegida==1){
+//                    return;
+//                } else{
+//                    System.out.println("\n");
+//                    buscarLibroPorTitulo();
+//                }
+//                break;
+
 
             //Fin del programa
             case -1:
@@ -90,12 +108,47 @@ public class Principal {
         String json = ConsumoAPI.obtenerDatos(urlBase+tituloLibro.replace(" ", "%20"));
         //Convierto el JSON para obtener la lista de libros en BibliotecaDTO
         BibliotecaDTO biblioteca = ConvierteDatos.convierteDatos(json, BibliotecaDTO.class);
-        //transformo el primer resultado en un Libro
-        Libro libro = new Libro(biblioteca.libros().get(0));
-        System.out.println(libro);
+        //obtengo el libro mas coincidente (contiene el titulo buscado y es el mas popular)
+        LibroDTO libroFiltrado = filtrarLibroMasCoincidente(biblioteca, tituloLibro);
+        if (libroFiltrado==null){
+            return;
+        }
+        //transformo el LibroDTO en un Libro
+        Libro libro = new Libro(libroFiltrado);
         repositorio.save(libro);
 
         System.out.println(libro);
+    }
+
+    private LibroDTO filtrarLibroMasCoincidente(BibliotecaDTO biblioteca, String tituloBuscado) {
+         List<LibroDTO> librosCompatibles = biblioteca.libros().stream()
+                .filter(libroDTO->libroDTO.titulo().toLowerCase().contains(tituloBuscado.toLowerCase()))
+                .collect(Collectors.toList());
+
+        if (librosCompatibles.isEmpty()){
+            System.out.println("\nNingún libro encontrado, por favor intente con otro título");
+            buscarLibroPorTitulo();
+        }
+
+        System.out.println("\n---------------------------------------------------------------------");
+        System.out.println("Mejor coincidencia: " + librosCompatibles.get(0).titulo());
+//        mostrarMenu(2);
+        System.out.println("""
+                        El resultado se basa en la coincidencia con el título y se muestra el más popular
+                        Es este el libro que estaba buscando?
+
+                        1- Sí (mostrar información de este libro)
+                        2- No (ingresar un título más parecido al del libro que estoy buscando)
+                        """);
+        Integer opcionElegida = ManejadorDeErrores.validarOpcion(2);
+        if (opcionElegida==1){
+            return librosCompatibles.get(0);
+        } else{
+            System.out.println("\n");
+            buscarLibroPorTitulo();
+            return null;
+        }
+//        return librosCompatibles.get(0);
     }
 
     public void obtenerTodosLosLibros() {
