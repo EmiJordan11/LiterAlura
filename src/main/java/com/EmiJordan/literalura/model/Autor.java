@@ -1,10 +1,7 @@
 package com.EmiJordan.literalura.model;
 
 import com.EmiJordan.literalura.dto.AutorDTO;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +14,7 @@ public class Autor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true)
     private String nombreCompleto;
     private Integer anioNacimiento;
     private Integer anioFallecimiento;
@@ -25,5 +23,14 @@ public class Autor {
         this.nombreCompleto = autorDTO.nombreCompleto();
         this.anioNacimiento = autorDTO.anioNacimiento();
         this.anioFallecimiento = autorDTO.anioFallecimiento();
+    }
+
+    @Override
+    public String toString() {
+        return "\n----------------------------AUTOR----------------------------" +
+                "\nNombre completo: " + nombreCompleto +
+                "\nAño de nacimiento: " + anioNacimiento +
+                "\nAño de fallecimiento: " + anioFallecimiento +
+                "\n------------------------------------------------------------";
     }
 }

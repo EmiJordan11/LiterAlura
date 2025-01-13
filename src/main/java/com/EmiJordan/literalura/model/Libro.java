@@ -4,6 +4,7 @@ import com.EmiJordan.literalura.dto.AutorDTO;
 import com.EmiJordan.literalura.dto.LibroDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 public class Libro {
     //--atributos
@@ -20,7 +22,8 @@ public class Libro {
     @Column(unique = true)
     private String titulo;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+//    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "libro_autor",
             joinColumns = @JoinColumn(name = "libro_id"),
@@ -52,7 +55,7 @@ public class Libro {
 
         return "----------------------------LIBRO----------------------------" +
                 "\nTitulo: " + titulo +
-                "\nAutores: " + autoresConcatenados +
+                "\nAutor/es: " + autoresConcatenados +
                 "\nIdioma: " + idioma +
                 "\nCantidad de Descargas: " + cantDescargas +
                 "\n-----------------------------------------------------------";

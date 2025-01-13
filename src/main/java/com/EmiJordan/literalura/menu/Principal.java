@@ -3,7 +3,9 @@ package com.EmiJordan.literalura.menu;
 import com.EmiJordan.literalura.dto.BibliotecaDTO;
 import com.EmiJordan.literalura.dto.LibroDTO;
 import com.EmiJordan.literalura.excepciones.ManejadorDeErrores;
+import com.EmiJordan.literalura.model.Autor;
 import com.EmiJordan.literalura.model.Libro;
+import com.EmiJordan.literalura.repository.AutorRepository;
 import com.EmiJordan.literalura.repository.LibroRepository;
 import com.EmiJordan.literalura.services.ConsumoAPI;
 import com.EmiJordan.literalura.services.ConvierteDatos;
@@ -12,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -19,10 +22,12 @@ public class Principal {
 
     private final Scanner scanner = new Scanner(System.in);
     private final String urlBase = "https://gutendex.com/books/?search=";
-    private LibroRepository repositorio;
+    private LibroRepository libroRepository;
+    private AutorRepository autorRepository;
 
-    public Principal(LibroRepository repositorio) {
-        this.repositorio = repositorio;
+    public Principal(LibroRepository libroRepository, AutorRepository autorRepository) {
+        this.libroRepository = libroRepository;
+        this.autorRepository = autorRepository;
     }
 
     public void mostrarMenu(int numMenu){
@@ -54,6 +59,10 @@ public class Principal {
                         break;
                     case 2:
                         obtenerTodosLosLibros();
+                        mostrarMenu(1);
+                        break;
+                    case 3:
+                        obtenerTodosLosAutores();
                         mostrarMenu(1);
                         break;
                 }
@@ -102,8 +111,9 @@ public class Principal {
 
     }
 
+
     public void buscarLibroPorTitulo() {
-        System.out.println("Ingrese el título del libro o una parte de él: ");
+        System.out.println("Ingrese el título del libro (o una parte de él): ");
         String tituloLibro = scanner.nextLine();
         String json = ConsumoAPI.obtenerDatos(urlBase+tituloLibro.replace(" ", "%20"));
         //Convierto el JSON para obtener la lista de libros en BibliotecaDTO
@@ -113,10 +123,17 @@ public class Principal {
         if (libroFiltrado==null){
             return;
         }
+
+        if (libroRepository.findByTitulo(libroFiltrado.titulo()).isPresent()){
+            System.err.println("\nNo se puede registrar dos veces el mismo libro en la base de datos. Puede visualizarlo desde Menú principal -> Opción 2");
+            return;
+        }
+
         //transformo el LibroDTO en un Libro
         Libro libro = new Libro(libroFiltrado);
-        repositorio.save(libro);
+//        libroRepository.save(libro);
 
+        guardarLibro(libro);
         System.out.println(libro);
     }
 
@@ -134,7 +151,7 @@ public class Principal {
         System.out.println("Mejor coincidencia: " + librosCompatibles.get(0).titulo());
 //        mostrarMenu(2);
         System.out.println("""
-                        El resultado se basa en la coincidencia con el título y se muestra el más popular
+                        El resultado se basa en la coincidencia del texto ingresado con el título, y se muestra el más popular
                         Es este el libro que estaba buscando?
 
                         1- Sí (mostrar información de este libro)
@@ -152,10 +169,30 @@ public class Principal {
     }
 
     public void obtenerTodosLosLibros() {
-        List<Libro> librosBuscados = repositorio.findAll();
+        List<Libro> librosBuscados = libroRepository.findAll();
         librosBuscados.stream()
                 .forEach(l-> System.out.println(l));
     }
+
+    private void obtenerTodosLosAutores() {
+        List<Autor> autores = autorRepository.findAll();
+        autores.forEach(a-> System.out.println(a));
+    }
+
+    public void guardarLibro(Libro libro){
+        for (int i = 0; i < libro.getAutores().size() ; i++) {
+            Autor autor = libro.getAutores().get(i);
+            Optional<Autor> autorExistente = autorRepository.findByNombreCompleto(autor.getNombreCompleto());
+            if (autorExistente.isPresent()){
+                libro.getAutores().set(i, autorExistente.get());
+            } else{
+                autor = autorRepository.save(autor);
+                libro.getAutores().set(i, autor);
+            }
+        }
+        libroRepository.save(libro);
+    }
+
 
     public static void limpiarConsola() {
         for (int i = 0; i < 10; i++) {
@@ -163,5 +200,12 @@ public class Principal {
         }
     }
 
-
+//        for (Autor autor: libro.getAutores()){
+//            System.out.println("verificando autor...");
+//            Optional<Autor> autorExistente = autorRepository.findByNombreCompleto(autor.getNombreCompleto());
+//            if (autorExistente.isPresent()){
+//                System.out.println("autor existente!!!!!!");
+//                autor = autorExistente.get();
+//            }
+//        }
 }
