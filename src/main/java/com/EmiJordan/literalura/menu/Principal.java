@@ -4,6 +4,7 @@ import com.EmiJordan.literalura.dto.BibliotecaDTO;
 import com.EmiJordan.literalura.dto.LibroDTO;
 import com.EmiJordan.literalura.excepciones.ManejadorDeErrores;
 import com.EmiJordan.literalura.model.Autor;
+import com.EmiJordan.literalura.model.Idioma;
 import com.EmiJordan.literalura.model.Libro;
 import com.EmiJordan.literalura.repository.AutorRepository;
 import com.EmiJordan.literalura.repository.LibroRepository;
@@ -65,6 +66,11 @@ public class Principal {
                         obtenerTodosLosAutores();
                         mostrarMenu(1);
                         break;
+                    case 4:
+                        obtenerAutoresPorAnio();
+                        break;
+                    case 5:
+                        obtenerLibrosPorIdioma();
                 }
 
                 break;
@@ -82,23 +88,6 @@ public class Principal {
                     mostrarMenu(-1);
                 }
                 break;
-//            case 2:
-//                System.out.println("""
-//                        El resultado se basa en la coincidencia con el título y se muestra el más popular
-//                        Es este el libro que estaba buscando?
-//
-//                        1- Sí (mostrar información de este libro)
-//                        2- No (ingresar un título más parecido al del libro que estoy buscando)
-//                        """);
-//                opcionElegida = ManejadorDeErrores.validarOpcion(2);
-//                if (opcionElegida==1){
-//                    return;
-//                } else{
-//                    System.out.println("\n");
-//                    buscarLibroPorTitulo();
-//                }
-//                break;
-
 
             //Fin del programa
             case -1:
@@ -110,7 +99,6 @@ public class Principal {
 
 
     }
-
 
     public void buscarLibroPorTitulo() {
         System.out.println("Ingrese el título del libro (o una parte de él): ");
@@ -131,8 +119,6 @@ public class Principal {
 
         //transformo el LibroDTO en un Libro
         Libro libro = new Libro(libroFiltrado);
-//        libroRepository.save(libro);
-
         guardarLibro(libro);
         System.out.println(libro);
     }
@@ -149,7 +135,6 @@ public class Principal {
 
         System.out.println("\n---------------------------------------------------------------------");
         System.out.println("Mejor coincidencia: " + librosCompatibles.get(0).titulo());
-//        mostrarMenu(2);
         System.out.println("""
                         El resultado se basa en la coincidencia del texto ingresado con el título, y se muestra el más popular
                         Es este el libro que estaba buscando?
@@ -165,7 +150,6 @@ public class Principal {
             buscarLibroPorTitulo();
             return null;
         }
-//        return librosCompatibles.get(0);
     }
 
     public void obtenerTodosLosLibros() {
@@ -177,6 +161,28 @@ public class Principal {
     private void obtenerTodosLosAutores() {
         List<Autor> autores = autorRepository.findAll();
         autores.forEach(a-> System.out.println(a));
+    }
+
+    private void obtenerAutoresPorAnio() {
+        Integer anio = ManejadorDeErrores.validarAnio();
+        List<Autor> autoresVivos= autorRepository.autoresPorAnio(anio);
+        if (!autoresVivos.isEmpty()){
+            autoresVivos.forEach(a-> System.out.println(a));
+        } else{
+            System.err.println("No hay autores registrados que hayan estado activos para el año ingresado");
+        }
+        mostrarMenu(1);
+    }
+
+    private void obtenerLibrosPorIdioma() {
+        Idioma idioma = ManejadorDeErrores.validarIdioma();
+        List<Libro> libros = libroRepository.librosPorIdioma(idioma);
+        if (!libros.isEmpty()){
+            libros.forEach(l-> System.out.println(l));
+        } else {
+            System.err.println("No hay libros registrados con el idioma ingresado");
+        }
+        mostrarMenu(1);
     }
 
     public void guardarLibro(Libro libro){
@@ -200,12 +206,4 @@ public class Principal {
         }
     }
 
-//        for (Autor autor: libro.getAutores()){
-//            System.out.println("verificando autor...");
-//            Optional<Autor> autorExistente = autorRepository.findByNombreCompleto(autor.getNombreCompleto());
-//            if (autorExistente.isPresent()){
-//                System.out.println("autor existente!!!!!!");
-//                autor = autorExistente.get();
-//            }
-//        }
 }
