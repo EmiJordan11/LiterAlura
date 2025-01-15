@@ -29,7 +29,7 @@ Aquí tienes una captura de pantalla del menú principal de la aplicación:
 ## ✏️ Instrucciones de ejecución
 1. **Descarga el archivo**: Desde la opción Code > Download ZIP, o puedes clonarlo para tenerlo de forma local:
     ```bash
-    git clone https://github.com/EmiJordan11/Conversor-de-monedas.git
+    git clone https://github.com/EmiJordan11/LiterAlura.git
     ```
 2. **Ábrelo en tu editor de código preferido** (Visual Studio Code, IntelliJ IDEA, etc.).
 3. Configura las dependencias necesarias (por ejemplo, Maven o Gradle).
