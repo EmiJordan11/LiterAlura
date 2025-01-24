@@ -1,4 +1,10 @@
-# 📗 LiterAlura
+<div align="center">
+  <img src="./src/main/resources/img/badge%20literalura.png" alt="Logo" height="120">
+  <h2>
+    📗 LiterAlura
+  </h2>
+</div>
+
 ## 📖 Descripción
 **LiterAlura** es una aplicación de consola creada con **Java** y **Spring**, diseñada para consultar y obtener información detallada sobre una amplia variedad de libros, incluyendo datos como el título, autor, cantidad de descargas y más. La aplicación hace uso de la **API de Gutendex** para acceder a esta información, facilitando la búsqueda y visualización de datos literarios de forma rápida y eficiente.
 
